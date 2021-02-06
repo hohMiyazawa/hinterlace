@@ -20,6 +20,7 @@ canvas{
 		<input type="range" min="0" max="100" value="25" class="slider" id="pixelRange" style="width: 100%;" step="any">
 		<input id="val" type="number" step="any" min="0" max="100" value="25"><span>%</span><br>
 		<button id="animate">animate</button>
+		<p>Disclaimer: This is just a simulation of the individual interlacing algorithms, not the formats as a whole. Actual progressive performance will depend on the compression schemes used. For instance, while the adam7 algorithm provides great progressive behaviour, PNG encodes each pass as a separate image, causing significant overhead.</p>
 		<div class="canvasContainer">
 			<div class="view">
 				<p>Full image</p>
@@ -30,7 +31,7 @@ canvas{
 				<canvas id="preview_scan" width="0" height="0"></canvas>
 			</div>
 			<div class="view">
-				<p>Adam7 interlacing</p>
+				<p>PNG interlacing (adam7)</p>
 				<canvas id="preview" width="0" height="0"></canvas>
 			</div>
 			<div class="view">

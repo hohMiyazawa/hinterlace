@@ -22,11 +22,11 @@ let flif_interlace = function(pixels){
 		let Cg = G - ((R + B)>>1);
 		transformed[i+0] = Y;
 		transformed[i+1] = Co;
-		transformed[i+2] = Cb;
+		transformed[i+2] = Cg;
 		transformed[i+3] = contextData[i+3];
 	}
 	let scale = 1;
-	while(scale < width || scale < height){
+	while(scale < img.width || scale < img.height){
 		scale *= 2;
 	}
 
