@@ -1,15 +1,19 @@
 const inputElementEncode = document.getElementById("infile");
 
 let contextData;
+let isSolid;
+let isGreyscale;
 let canvas = document.getElementById("preview");
 let ctx = canvas.getContext("2d");
 let canvas_gif = document.getElementById("preview_gif");
 let ctx_gif = canvas_gif.getContext("2d");
+let canvas_scan = document.getElementById("preview_scan");
+let ctx_scan = canvas_scan.getContext("2d");
 let img;
 
 let drawInterlace = function(){
 	let pixelPercentage = parseFloat(document.getElementById("pixelRange").value);
-	document.getElementById("val").innerText = pixelPercentage + "%";
+	document.getElementById("val").value = pixelPercentage;
 
 	let newData = new Array(contextData.length).fill(0);
 	let pixels = Math.round((pixelPercentage/100) * (contextData.length/4));
@@ -198,6 +202,16 @@ let drawInterlace = function(){
 
 	let image_gif = new ImageData(new Uint8ClampedArray(newData_gif),img.width);
 	ctx_gif.putImageData(image_gif,0,0);
+
+	pixels = Math.round((pixelPercentage/100) * (contextData.length/4));
+
+	let newData_scan = Array.from(contextData).slice(0,pixels*4).concat(new Array(contextData.length - pixels*4).fill(0));
+
+	canvas_scan.width = img.width;
+	canvas_scan.height = img.height;
+
+	let image_scan = new ImageData(new Uint8ClampedArray(newData_scan),img.width);
+	ctx_scan.putImageData(image_scan,0,0);
 }
 
 let html_encode = function(){
@@ -213,6 +227,20 @@ let html_encode = function(){
 				canvas.width = img.width;
 				ctx.drawImage(img, 0, 0);
 				contextData = ctx.getImageData(0,0,img.width,img.height).data;
+				isSolid = true;
+				for(let i=3;i<contextData.length;i+=4){
+					if(contextData[i] !== 255){
+						isSolid = false;
+						break;
+					}
+				}
+				isGreyscale = true;
+				for(let i=0;i<contextData.length;i+=4){
+					if((contextData[i] !== contextData[i+1]) || (contextData[i] !== contextData[i+2])){
+						isGreyscale = false;
+						break;
+					}
+				}
 				drawInterlace();
 			});
 			img.src = e.target.result;
@@ -235,3 +263,10 @@ document.getElementById("animate").addEventListener("click",function(){
 	}
 	partial(0);
 },false);
+
+let setval = function(num){
+	document.getElementById("pixelRange").value = num;
+	drawInterlace();
+}
+
+document.getElementById("val").addEventListener("change",function(){setval(parseFloat(document.getElementById("val").value))},false);
