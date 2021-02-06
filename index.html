@@ -7,6 +7,9 @@
 	display: inline-block;
 	width: 45%;
 }
+canvas{
+	max-width: 100%;
+}
 		</style>
 	</head>
 	<body>
@@ -23,6 +26,10 @@
 				<canvas id="original" width="0" height="0"></canvas>
 			</div>
 			<div class="view">
+				<p>Simple scanline</p>
+				<canvas id="preview_scan" width="0" height="0"></canvas>
+			</div>
+			<div class="view">
 				<p>Adam7 interlacing</p>
 				<canvas id="preview" width="0" height="0"></canvas>
 			</div>
@@ -31,8 +38,8 @@
 				<canvas id="preview_gif" width="0" height="0"></canvas>
 			</div>
 			<div class="view">
-				<p>Scanline</p>
-				<canvas id="preview_scan" width="0" height="0"></canvas>
+				<p>FLIF interlacing (TODO)</p>
+				<canvas id="preview_flif" width="0" height="0"></canvas>
 			</div>
 		</div>
 		<script src="hinterlace.js"></script>

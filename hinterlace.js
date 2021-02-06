@@ -11,6 +11,29 @@ let canvas_scan = document.getElementById("preview_scan");
 let ctx_scan = canvas_scan.getContext("2d");
 let img;
 
+let flif_interlace = function(pixels){
+	let transformed = [];
+	for(let i=0;i<contextData.length;i+=4){
+		let R = contextData[i];
+		let G = contextData[i + 1];
+		let B = contextData[i + 2];
+		let Y = (((R + B)>>1) + G)>>1;
+		let Co = R - B;
+		let Cg = G - ((R + B)>>1);
+		transformed[i+0] = Y;
+		transformed[i+1] = Co;
+		transformed[i+2] = Cb;
+		transformed[i+3] = contextData[i+3];
+	}
+	let scale = 1;
+	while(scale < width || scale < height){
+		scale *= 2;
+	}
+
+	let newData = new Array(contextData.length).fill(0);
+
+}
+
 let drawInterlace = function(){
 	let pixelPercentage = parseFloat(document.getElementById("pixelRange").value);
 	document.getElementById("val").value = pixelPercentage;
@@ -212,6 +235,8 @@ let drawInterlace = function(){
 
 	let image_scan = new ImageData(new Uint8ClampedArray(newData_scan),img.width);
 	ctx_scan.putImageData(image_scan,0,0);
+
+	flif_interlace(pixels);
 }
 
 let html_encode = function(){
