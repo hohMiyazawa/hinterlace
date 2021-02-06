@@ -9,6 +9,8 @@ let canvas_gif = document.getElementById("preview_gif");
 let ctx_gif = canvas_gif.getContext("2d");
 let canvas_scan = document.getElementById("preview_scan");
 let ctx_scan = canvas_scan.getContext("2d");
+let canvas_flif = document.getElementById("preview_flif");
+let ctx_flif = canvas_flif.getContext("2d");
 let img;
 
 let flif_interlace = function(pixels){
@@ -31,6 +33,342 @@ let flif_interlace = function(pixels){
 	}
 
 	let newData = new Array(contextData.length).fill(0);
+
+	let x_scale = scale;
+	let y_scale = scale;
+	let complete = 1;
+	let tmp_xscale = x_scale;
+	let tmp_yscale = y_scale;
+	while(complete <= pixels){
+		x_scale = tmp_xscale;
+		y_scale = tmp_yscale;
+		if(tmp_xscale === tmp_yscale){
+			tmp_xscale = tmp_xscale/2;
+		}
+		else{
+			tmp_yscale = tmp_xscale;
+		}
+		complete = Math.ceil(img.width/tmp_xscale)*Math.ceil(img.height/tmp_yscale);
+	}
+
+	console.log(x_scale,y_scale);
+
+	for(let row = 0;row < img.height && pixels;row += y_scale){
+		for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+			let anch = (row * img.width + pos)*4;
+			for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+				for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+					let rel = ((row + off_y) * img.width + pos + off_x)*4;
+					newData[rel] = transformed[anch];
+					newData[rel+1] = transformed[anch+1];
+					newData[rel+2] = transformed[anch+2];
+					newData[rel+3] = transformed[anch+3];
+				}
+			}
+			pixels--;
+		}
+	}
+
+//implement channel reordering later!
+
+	if(!isSolid && isGreyscale){
+		pixels *= 2;
+		if(x_scale === y_scale){
+			x_scale = x_scale/2;
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+3] = transformed[anch+3];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+		else{
+			y_scale = x_scale;
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+3] = transformed[anch+3];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+	}
+	else if(isSolid && isGreyscale){
+		if(x_scale === y_scale){
+			x_scale = x_scale/2;
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+		else{
+			y_scale = x_scale;
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+	}
+	else if(!isSolid && !isGreyscale){
+		pixels *= 4;
+		if(x_scale === y_scale){
+			x_scale = x_scale/2;
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+3] = transformed[anch+3];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+1] = transformed[anch+1];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+2] = transformed[anch+2];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+		else{
+			y_scale = x_scale;
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+3] = transformed[anch+3];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+1] = transformed[anch+1];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+2] = transformed[anch+2];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+	}
+	else{
+		pixels *= 3;
+		if(x_scale === y_scale){
+			x_scale = x_scale/2;
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+1] = transformed[anch+1];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = 0;row < img.height && pixels;row += y_scale){
+				for(let pos = x_scale;pos < img.width && pixels;pos += x_scale*2){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+2] = transformed[anch+2];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+		else{
+			y_scale = x_scale;
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel] = transformed[anch];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+1] = transformed[anch+1];
+						}
+					}
+					pixels--;
+				}
+			}
+			for(let row = y_scale;row < img.height && pixels;row += y_scale*2){
+				for(let pos = 0;pos < img.width && pixels;pos += x_scale){
+					let anch = (row * img.width + pos)*4;
+					for(let off_y = 0;off_y < y_scale && row + off_y < img.height;off_y++){
+						for(let off_x = 0;off_x < x_scale && pos + off_x < img.width;off_x++){
+							let rel = ((row + off_y) * img.width + pos + off_x)*4;
+							newData[rel+2] = transformed[anch+2];
+						}
+					}
+					pixels--;
+				}
+			}
+		}
+	}
+
+//
+
+	let transformed2 = [];
+	for(let i=0;i<transformed.length;i+=4){
+		let Y = newData[i];
+		let Co = newData[i + 1];
+		let Cg = newData[i + 2];
+		let G = Y - ((-Cg)>>1);
+		let B = Y + ((1-Cg)>>1) - (Co>>1);
+		let R = Co + B;
+
+		transformed2[i+0] = R;
+		transformed2[i+1] = G;
+		transformed2[i+2] = B;
+		transformed2[i+3] = newData[i+3];
+	}
+
+	canvas_flif.width = img.width;
+	canvas_flif.height = img.height;
+
+	let image_flif = new ImageData(new Uint8ClampedArray(transformed2),img.width);
+	ctx_flif.putImageData(image_flif,0,0);
 
 }
 
