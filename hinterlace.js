@@ -615,16 +615,23 @@ inputElementEncode.addEventListener("change",html_encode,false);
 document.getElementById("load").addEventListener("click",html_encode,false);
 document.getElementById("pixelRange").addEventListener("change",drawInterlace,false);
 
+let isAnimated = false;
 document.getElementById("animate").addEventListener("click",function(){
 	let partial = function(num){
 		document.getElementById("pixelRange").value = num;
 		drawInterlace();
 		num += 0.5;
-		if(num <= 100){
+		if(num <= 100 && isAnimated){
 			setTimeout(function(){partial(num)},200);
 		}
 	}
-	partial(0);
+	if(isAnimated){
+		isAnimated = false;
+	}
+	else{
+		isAnimated = true;
+		partial(0);
+	}
 },false);
 
 let setval = function(num){
